@@ -1,3 +1,17 @@
+<#
+.SYNOPSIS
+    This script automatically detects the network location and remediates Global Secure Access (GSA) services.
+
+.DESCRIPTION
+    The script checks the external IP address against a target IP. Based on whether the IP matches, 
+    it either stops or starts the specified GSA services. It also checks for a registry key to suspend 
+    the remediation process. The script runs in a loop for a defined number of iterations before exiting.
+
+.AUTHOR
+    Email: linus.salomonsson@daeio.com
+    
+#>
+
 function Get-ExternalIP {
     try {
         $externalIP = Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing | Select-Object -ExpandProperty Content
