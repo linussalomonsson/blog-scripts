@@ -1,0 +1,41 @@
+variables:
+- name: vmImageName
+  value: 'windows-latest'
+- group: xxx-variablegroup
+
+trigger:
+  branches:
+    include:
+    - '*'
+  paths:
+    include:
+    - '**/*.json'
+
+stages:
+- stage: IntuneDeployment
+  jobs:
+  - job: intune_deployment
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    # Install the required PowerShell module
+    - task: PowerShell@2
+      inputs:
+        pwsh: true
+        targetType: inline
+        script: |
+          Install-Module -Name Microsoft.Graph -AllowPrerelease -AllowClobber -Force
+          #Import-Module -Name Microsoft.Graph
+          # Verify installation
+          #Get-Module -Name Microsoft.Graph
+        displayName: 'Install and Import Microsoft.Graph Module'
+
+    # Assuming you want to run two different PowerShell scripts
+    - task: PowerShell@2
+      inputs:
+        pwsh: true
+        targetType: filePath
+        filePath: '$(Build.Repository.LocalPath)\\intune-cac.ps1'
+        arguments: -appIdDev '$(appIdDev)' -appSecretDev '$(appSecretDev)' -tenantIdDev '$(tenantIdDev)'
+        displayName: 'Run Intune Deployment'
+        ignoreLASTEXITCODE: true

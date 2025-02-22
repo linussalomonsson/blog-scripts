@@ -1,0 +1,25 @@
+{
+  "ChatIcon": {
+    "name": "Windows: Chat icon - Disable",
+    "description": "Disables the built in Windows 11 chat icon",
+    "platforms": "windows10",
+    "technologies": "mdm",
+    "roleScopeTagIds": [
+      "0"
+    ],
+    "settings": [
+      {
+        "@odata.type": "#microsoft.graph.deviceManagementConfigurationSetting",
+        "settingInstance": {
+          "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
+          "settingDefinitionId": "device_vendor_msft_policy_config_experience_configurechaticon",
+          "choiceSettingValue": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingValue",
+            "value": "device_vendor_msft_policy_config_experience_configurechaticon_2",
+            "children": []
+          }
+        }
+      }
+    ]
+  }
+}
