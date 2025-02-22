@@ -8,7 +8,7 @@
     the remediation process. The script runs in a loop for a defined number of iterations before exiting.
 
 .AUTHOR
-    Email: linus.salomonsson@futureitpartner.se
+    Email: linus.salomonsson@daeio.com
     
 #>
 

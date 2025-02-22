@@ -12,7 +12,7 @@
     This should be executed from a CI/CD pipeline.
 
 .AUTHOR
-    Email: linus.salomonsson@futureitpartner.se
+    Email: linus.salomonsson@daeio.com
 #>
 
 param (
