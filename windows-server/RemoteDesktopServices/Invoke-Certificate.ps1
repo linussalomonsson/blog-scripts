@@ -17,15 +17,15 @@
     Email: linus.salomonsson@daeio.com
 #>
 [CmdletBinding()]
-param (
-    [Parameter (Mandatory = $true)]
-    [securestring]$certpassword,
-    [Paramter (Mandatory = $true)]
-    [string]$fileName,
-    [Parameter (Mandatory = $true)]
-    [string]$blobUri,
-    [Parameter (Mandatory = $true)]
-    [string]$blobSAS
+param(
+	[Parameter(Mandatory = $true)]
+	[securestring]$certpassword,
+	[Paramter(Mandatory = $true)]
+	[string]$fileName,
+	[Parameter(Mandatory = $true)]
+	[string]$blobUri,
+	[Parameter(Mandatory = $true)]
+	[string]$blobSAS
 )
 
 $hostname = [System.Net.Dns]::GetHostByName((hostname)).HostName
@@ -37,79 +37,79 @@ Start-Transcript -Path $logPath -Force
 Write-Output "Starting certificate deployment at $(Get-Date)"
 
 if ($blobUri -notlike "*/") {
-    $blobUri += "/"
-    $fullUri = $blobUri + $fileName + $blobSAS
+	$blobUri += "/"
+	$fullUri = $blobUri + $fileName + $blobSAS
 }
 else {
-    $fullUri = $blobUri + $fileName + $blobSAS
+	$fullUri = $blobUri + $fileName + $blobSAS
 }
 
 if ($fileName -notlike "*.pfx") {
-    Write-Output "The certificate file must be a .pfx file"
-    exit
+	Write-Output "The certificate file must be a .pfx file"
+	exit
 }
 else {
-    $OutputPath = "C:\ProgramData\daeio\$($fileName)"
+	$OutputPath = "C:\ProgramData\daeio\$($fileName)"
 }
 
 try {
-    Invoke-WebRequest -Uri $fullURI -OutFile $OutputPath
-    Write-Output "Successfully downloaded certificate..."
+	Invoke-WebRequest -Uri $fullURI -OutFile $OutputPath
+	Write-Output "Successfully downloaded certificate..."
 }
 catch {
-    Write-Error "Could not download certificate..."
-    $_.Exception.Message
-    Stop-Transcript
-    exit 1
+	Write-Error "Could not download certificate..."
+	$_.Exception.Message
+	Stop-Transcript
+	exit 1
 }
 
 function Invoke-Certificate {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$hostname,
-        [Parameter(Mandatory = $true)]
-        [string]$certPath,
-        [Parameter(Mandatory = $true)]
-        [securestring]$certpassword
-    )
-    
-    $roles = @("RDGateway", "RDWebAccess", "RDPublishing", "RDRedirector")
-    
-    try {
-        Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\LocalMachine\My -Exportable -Password $certpassword
-        Write-Output "Imported certificate to Cert:\LocalMachine\My"
-        
-        foreach ($role in $roles) {
-            Write-Output "Setting certificate for role '$role'..."
-            Set-RDCertificate -Role $role -ImportPath $certPath -Password $certpassword -ConnectionBroker $hostname -Force
-        }
+	param(
+		[Parameter(Mandatory = $true)]
+		[string]$hostname,
+		[Parameter(Mandatory = $true)]
+		[string]$certPath,
+		[Parameter(Mandatory = $true)]
+		[securestring]$certpassword
+	)
 
-        Write-Output "Successfully set SSL certificate for $hostname"
+	$roles = @("RDGateway","RDWebAccess","RDPublishing","RDRedirector")
 
-        if (Get-Module -ListAvailable -Name RDWebClientManagement -ErrorAction SilentlyContinue) {
-            Import-RDWebClientBrokerCert -Path $certPath -Password $certpassword -ErrorAction Stop
-            Publish-RDWebClientPackage -Type Production -Latest -ErrorAction Stop
-            Write-Output "Successfully imported and published new certificate to the HTML webclient"
-        }
-        else {
-            Write-Output "HTML webclient module is not installed, skipping import and publish..."
-        }
+	try {
+		Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\LocalMachine\My -Exportable -Password $certpassword
+		Write-Output "Imported certificate to Cert:\LocalMachine\My"
 
-    }
-    catch {
-        Write-Error "Could not set SSL certificate for $hostname"
-        $_.Exception.Message
-        Throw 
-    }
+		foreach ($role in $roles) {
+			Write-Output "Setting certificate for role '$role'..."
+			Set-RDCertificate -Role $role -ImportPath $certPath -Password $certpassword -ConnectionBroker $hostname -Force
+		}
+
+		Write-Output "Successfully set SSL certificate for $hostname"
+
+		if (Get-Module -ListAvailable -Name RDWebClientManagement -ErrorAction SilentlyContinue) {
+			Import-RDWebClientBrokerCert -Path $certPath -Password $certpassword -ErrorAction Stop
+			Publish-RDWebClientPackage -Type Production -Latest -ErrorAction Stop
+			Write-Output "Successfully imported and published new certificate to the HTML webclient"
+		}
+		else {
+			Write-Output "HTML webclient module is not installed, skipping import and publish..."
+		}
+
+	}
+	catch {
+		Write-Error "Could not set SSL certificate for $hostname"
+		$_.Exception.Message
+		throw
+	}
 }
 
 try {
-    Invoke-Certificate -hostname $hostname -certPath $OutputPath -certpassword $certpassword
+	Invoke-Certificate -HostName $hostname -certPath $OutputPath -certpassword $certpassword
 }
 catch {
-    Write-Error "Could not set SSL certificate for $hostname"
-    $_.Exception.Message
-    exit 1
+	Write-Error "Could not set SSL certificate for $hostname"
+	$_.Exception.Message
+	exit 1
 }
 
 Write-Output "Removing certificate file '$OutputPath'"
