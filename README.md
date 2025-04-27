@@ -1,3 +1,3 @@
 # blog-scripts
 Scripts that are linked in my personal blog.
-You can find the blog here: [blog.daeio.com](https://daeio.com/)
+You can find the blog here: [daeio.com](https://daeio.com/)
